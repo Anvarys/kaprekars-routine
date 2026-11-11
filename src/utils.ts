@@ -12,3 +12,5 @@ export function readLocalStorage<T>(key: string, fallback: T): T {
 export function writeLocalStorage<T>(key: string, value: T) {
   localStorage.setItem(key, JSON.stringify(value))
 }
+
+export const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
