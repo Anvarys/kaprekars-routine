@@ -3,7 +3,7 @@
 :root {
   --text: #ffb987;
   --text-h: #f3f4f6;
-  --bg: #16171d;
+  --bg: #020208;
   --border: #2e303a;
   --code-bg: #1f2028;
   --accent: #c084fc;
@@ -11,7 +11,7 @@
   --accent-border: rgba(192, 132, 252, 0.5);
   --shadow:
     rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-
+  --input: #878fff;
   --mono: ui-monospace, Consolas, monospace;
 
   font: 18px/145%;
@@ -41,4 +41,56 @@ p {
 
 h1 {
   font-size: 3rem;
+  color: #87bdff;
+
+  @media (max-width: 1024px) {
+    font-size: 2.5rem;
+  }
+}
+
+.press-button {
+  position: relative;
+  z-index: 1;
+  display: block;
+  cursor: pointer;
+  color: #000000;
+  background: #93e67a;
+  border-radius: 1rem;
+  border: none;
+  padding: 0.8rem;
+  font-size: 1.2rem;
+
+  transform: translateY(0);
+  transition: transform 200ms ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.press-button.pressed {
+  transform: translateY(6px);
+}
+
+.press-button-wrap {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 6px;
+}
+
+.press-button-wrap::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #629a52;
+  border-radius: 1rem;
+}
+
+input {
+  border-color: var(--input);
+  color: var(--input);
+  padding: 0.25rem;
+  border-radius: 0.5rem;
+  border-width: 2px;
 }
