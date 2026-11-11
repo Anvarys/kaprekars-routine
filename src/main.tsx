@@ -17,7 +17,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/" element={<Navigate to={readLocalStorage("showIntro", true) ? "/intro" : readLocalStorage("lastPage", "/intro")} replace />} />
 
         <Route path="/intro" element={<IntroPage />} />
-        
+
         <Route path='/visualisation'>
           <Route path='simple' element={<SimpleVisualisationPage />} />
         </Route>
