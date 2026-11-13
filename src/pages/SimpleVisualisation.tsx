@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import PressButton from "../components/PressButton"
 import { sleep } from "../utils"
 
@@ -14,16 +14,6 @@ type DataItem = {
   color?: string
 }
 
-type Pointer = {
-  id: number,
-  chars: number,
-  x: number,
-  y: number,
-  char?: string,
-  duration?: number,
-  color?: number
-}
-
 type Move = {x?: number, y?: number, dx?: number, dy?: number}
 
 function SimpleVisualisationPage() {
@@ -33,14 +23,6 @@ function SimpleVisualisationPage() {
   const [running, setRunning] = useState<boolean>(false)
   const [animationStage, setAnimationStage] = useState<number>(-1)
   const [data, setData] = useState<DataType>(getInitData())
-  const [pointers, setPointers] = useState<Pointer[]>([
-    {
-      id: 0,
-      chars: 4,
-      x: 1,
-      y: 0,
-    }
-  ])
 
   function getInitData() {
     const ndata: DataType = {bigger: []}
@@ -80,19 +62,6 @@ function SimpleVisualisationPage() {
           duration: duration
         }
       })
-    }))
-  }
-
-  function movePointer(id: number, x: number, y: number, new_color?: string, duration?: number) {
-    setPointers(prev => ({
-      ...prev,
-      [id]: {
-        ...prev[id],
-        x: x,
-        y: y,
-        color: new_color,
-        duration: duration
-      } as Pointer
     }))
   }
 
@@ -184,28 +153,6 @@ function SimpleVisualisationPage() {
             {numberChosen[i]}
           </span>
         ))}
-        </div>
-      }
-      { pointers.length > 0 &&
-        <div aria-hidden className="pointer-events-none inset-0 fixed flex justify-center top-10.5">
-        {Array.from(pointers, (p) => (
-          <span
-            key={p.id}
-            className="absolute inline-block w-[1ch] text-center transition-all test"
-            style={{
-              transform: `translateX(calc((-1ch - 2rem)*${p.chars/2.0-p.x - (p.chars+1)%2/2.0}))  translateY(calc((6rem)*${p.y}))`,
-              color: `var(--${p.color ?? "text"}`,
-              transitionDuration: `${p.duration ?? 500}ms`
-            }}
-          >
-            {p.char ?? "_"}
-          </span>
-        ))}
-        </div>
-      }
-      { animationStage >= 1 && animationStage <= 3 &&
-        <div className="fades">
-
         </div>
       }
     </div>
