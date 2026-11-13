@@ -18,9 +18,9 @@
   --number-red: #ff87ab;
   --number-salad: #d9ff87;
 
-  font: 18px/145%;
+  font: 16px;
   font-family: 'Kavivanar', cursive;
-  letter-spacing: 0.18px;
+  letter-spacing: 0.16px;
   color-scheme: light dark;
   color: var(--text);
   background: var(--bg);
@@ -28,10 +28,7 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  transition-timing-function: ease-in-out;
 }
 
 body {
@@ -105,7 +102,7 @@ input {
   border-width: 2px;
 }
 
-.fades-away {
+.fades {
   opacity: 1;
   visibility: visible;
   transition: opacity 500ms linear, visibility 1s linear;
@@ -117,4 +114,3 @@ input {
   pointer-events: none;
   transition: opacity 500ms linear, visibility 1s linear;
 }
-
