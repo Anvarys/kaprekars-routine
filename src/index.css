@@ -105,12 +105,14 @@ input {
 .fades {
   opacity: 1;
   visibility: visible;
-  transition: opacity 500ms linear, visibility 1s linear;
+  transition-property: opacity, visibility;
+  transition-timing-function: ease-out;
 }
 
-.fades-away.fading {
+.fades.faded {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity 500ms linear, visibility 1s linear;
+  transition-property: opacity, visibility;
+  transition-timing-function: ease-out;
 }
