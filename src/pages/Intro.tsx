@@ -25,7 +25,7 @@ function IntroPage() {
         writeLocalStorage("showIntro", false)
         writeLocalStorage("lastPage", "/visualisation/simple")
         navigate("/visualisation/simple")
-        }} noRelease>Try yourself</PressButton>
+        }} noRelease className="relative">Try yourself</PressButton>
     </div>
   </div>
   )
