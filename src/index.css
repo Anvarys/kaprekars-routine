@@ -79,7 +79,6 @@ h3 {
 }
 
 .press-button-wrap {
-  position: relative;
   display: inline-block;
   padding-bottom: 6px;
 }
@@ -104,14 +103,18 @@ input {
 .fades {
   opacity: 1;
   visibility: visible;
-  transition-property: opacity, visibility;
+  transition-property: all;
   transition-timing-function: ease-out;
+}
+
+.faded.special-checkbox {
+  transition-duration: 700ms;
 }
 
 .fades.faded {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition-property: opacity, visibility;
+  transition-property: all;
   transition-timing-function: ease-out;
 }

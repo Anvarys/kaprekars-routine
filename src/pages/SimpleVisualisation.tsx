@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import PressButton from "../components/PressButton"
-import { sleep, nextClick } from "../utils"
+import { sleep, nextClick, readLocalStorage, writeLocalStorage } from "../utils"
+import { Checkbox } from "../components/Checkbox"
 
 type DataType = {
   bigger: DataItem[],
@@ -21,12 +22,11 @@ type DataItem = {
 type Move = {x?: number, y?: number, dx?: number, dy?: number}
 
 function SimpleVisualisationPage() {
-  const DIGITS = 4;
-
-  const defaultNumber = Array.from({length: DIGITS}, (_, i) => (i+1)%10).join("")
+  const [DIGITS, setDigits] = useState<number>(readLocalStorage("digits", 4))
+  let defaultNumber = Array.from({length: DIGITS}, (_, i) => (i+1)%10).join("")
 
   const [numberChosen, setNumberChosen] = useState<string>(defaultNumber)
-  const [resultNumber, setResultNumber] = useState<Array<number>>([-1,-1,-1,-1])
+  const [resultNumber, setResultNumber] = useState<Array<number>>(Array.from({length: DIGITS}, () => -1))
   const [running, setRunning] = useState<boolean>(false)
   const [animationStage, _setAnimationStage] = useState<number>(-1)
   const [data, setData] = useState<DataType>(getInitData())
@@ -34,9 +34,27 @@ function SimpleVisualisationPage() {
   const [infoStr, setInfoStr] = useState<string>("")
   const [wrongInput, setWrongInput] = useState<boolean>(false)
   const [speedUp, setSpeedUp] = useState<number>(1)
+  const [hasRanOnce, setHasRanOnce] = useState(readLocalStorage("hasRanOnce", false))
+  const [skipInfo, setSkipInfo] = useState(readLocalStorage("skipInfo", false))
   const routineStepRef = useRef<number>(0)
   const speedUpRef = useRef<number>(1)
   const numberChosenRef = useRef<string>(defaultNumber)
+
+  useEffect(() => {
+    writeLocalStorage("hasRanOnce", hasRanOnce)
+  }, [hasRanOnce])
+
+  useEffect(() => {
+    writeLocalStorage("skipInfo", skipInfo)
+  }, [skipInfo])
+
+  useEffect(() => {
+    numberChosenRef.current = numberChosen
+  }, [numberChosen])
+
+  useEffect(() => {
+    writeLocalStorage("digits", DIGITS)
+  }, [DIGITS])
 
   async function setAnimationStage(value: number) {
     _setAnimationStage(value)
@@ -124,7 +142,7 @@ function SimpleVisualisationPage() {
   }
 
   async function showInfo(str: string, force?: boolean) {
-    if (force == true || routineStepRef.current == 0) {
+    if ((force == true || routineStepRef.current == 0) && !skipInfo) {
       console.log(routineStepRef.current)
       setInfoStr(str)
       setAwaitingClick(true)
@@ -132,10 +150,6 @@ function SimpleVisualisationPage() {
       setAwaitingClick(false)
     }
   }
-
-  useEffect(() => {
-    numberChosenRef.current = numberChosen
-  }, [numberChosen])
 
   async function animate() {
     setData(getInitData())
@@ -154,6 +168,8 @@ function SimpleVisualisationPage() {
 
     // make the bigger number
     await setAnimationStage(2)
+    await sleep(30)
+
     const decreasing = numStrToIndexedArray(numberChosenRef.current).toSorted((a, b) => b[0]-a[0])
     let biggerNumber = 0
     for (let i = 0; i < DIGITS; i++) {
@@ -171,7 +187,7 @@ function SimpleVisualisationPage() {
     await showInfo("2. Creating the smallest number by choosing the smallest digits first")
     // make the smaller number
     await setAnimationStage(3)
-    await sleep(50)
+    await sleep(30)
 
     const increasing = Array.from(decreasing).toReversed()
     let smallerNumber = 0
@@ -211,6 +227,7 @@ function SimpleVisualisationPage() {
       document.querySelectorAll(".faded").forEach((e) => {
         e.classList.remove("faded")
       })
+      setHasRanOnce(true)
       return
     }
 
@@ -241,15 +258,15 @@ function SimpleVisualisationPage() {
     await sleep(s(800))
 
     routineStepRef.current += 1
-    speedUpRef.current *= 0.9
+    speedUpRef.current *= 0.8
     setSpeedUp(speedUpRef.current)
     setNumberChosen(result)
     animate()
   }
 
   return (
-  <div className={`flex w-full min-h-screen max-h-screen flex-col p-5 items-center justify-center gap-40`}>
-    <h3 className="fades duration-700" hidden={running}>Enter any {DIGITS} digit number with at least 2 different digits</h3>
+  <div className={`flex w-full min-h-screen max-h-screen flex-col p-5 items-center justify-center`}>
+    <h3 className="fades duration-700 absolute top-[35%]" hidden={running}>Enter any {DIGITS} digit number with at least 2 different digits</h3>
     <div className="fixed inline-block font-mono text-[3rem] leading-none h-17 justify-center transition-all duration-700 z-10" style={{top: running ? "2rem" : "45%"}}>
       <input value={numberChosen} onChange={ e => {
           const value = e.target.value
@@ -281,7 +298,33 @@ function SimpleVisualisationPage() {
       </div>
     </div>
 
-    <PressButton className="fades duration-700" hidden={running} onClick={() => {
+    { hasRanOnce &&
+    <div className="fixed top-[calc(45%+5rem)] flex flex-col gap-2">
+      <Checkbox 
+        label="Skip explanations"
+        checked={skipInfo}
+        onChange={e => setSkipInfo(e.target.checked)}
+        className="fades special-checkbox"
+        hidden={running}
+      />
+      <Checkbox 
+        label="3 digits"
+        checked={DIGITS == 3}
+        onChange={e => {
+          const digits = e.target.checked ? 3 : 4
+          setDigits(digits)
+          defaultNumber = Array.from({length: digits}, (_, i) => (i+1)%10).join("")
+          setNumberChosen(defaultNumber)
+          setResultNumber(Array.from({length: digits}, () => -1))
+          numberChosenRef.current = defaultNumber
+        }}
+        className="fades special-checkbox"
+        hidden={running}
+      />
+    </div>
+    }
+
+    <PressButton className="fades duration-700 fixed top-[70%]" hidden={running} onClick={() => {
       const formattedNumber = "0".repeat(DIGITS-numberChosen.length)+numberChosen
       if ((new Set(formattedNumber)).size <= 1) {
         setWrongInput(true)
