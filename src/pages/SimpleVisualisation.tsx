@@ -266,7 +266,7 @@ function SimpleVisualisationPage() {
 
   return (
   <div className={`flex w-full min-h-screen max-h-screen flex-col p-5 items-center justify-center`}>
-    <h3 className="fades duration-700 absolute top-[35%]" hidden={running}>Enter any {DIGITS} digit number with at least 2 different digits</h3>
+    <h3 className="fades duration-700 fixed top-[30%] text-center md:top-[35%]" hidden={running}>Enter any {DIGITS} digit number with at least 2 different digits</h3>
     <div className="fixed inline-block font-mono text-[3rem] leading-none h-17 justify-center transition-all duration-700 z-10" style={{top: running ? "2rem" : "45%"}}>
       <input value={numberChosen} onChange={ e => {
           const value = e.target.value
