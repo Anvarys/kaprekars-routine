@@ -23,19 +23,33 @@ type Move = {x?: number, y?: number, dx?: number, dy?: number}
 function SimpleVisualisationPage() {
   const DIGITS = 4;
 
-  const [numberChosen, setNumberChosen] = useState<string>("1234")
+  const defaultNumber = Array.from({length: DIGITS}, (_, i) => (i+1)%10).join("")
+
+  const [numberChosen, setNumberChosen] = useState<string>(defaultNumber)
   const [resultNumber, setResultNumber] = useState<Array<number>>([-1,-1,-1,-1])
   const [running, setRunning] = useState<boolean>(false)
   const [animationStage, _setAnimationStage] = useState<number>(-1)
   const [data, setData] = useState<DataType>(getInitData())
   const [awaitingClick, setAwaitingClick] = useState<boolean>(false)
   const [infoStr, setInfoStr] = useState<string>("")
+  const [wrongInput, setWrongInput] = useState<boolean>(false)
+  const [speedUp, setSpeedUp] = useState<number>(1)
   const routineStepRef = useRef<number>(0)
-  const numberChosenRef = useRef<string>("1234")
+  const speedUpRef = useRef<number>(1)
+  const numberChosenRef = useRef<string>(defaultNumber)
 
   async function setAnimationStage(value: number) {
     _setAnimationStage(value)
     return await sleep(10)
+  }
+
+  function s(value: number) {
+    return Math.round(value * speedUpRef.current)
+  }
+
+  function sr(value: number) {
+    console.log(Math.round(value * speedUp))
+    return Math.round(value * speedUp)
   }
 
   function getInitData() {
@@ -44,7 +58,7 @@ function SimpleVisualisationPage() {
       ndata.bigger.push({
         baseX: digit,
         x: digit,
-        y: -.3
+        y: -0.3
       })
       ndata.smaller.push({
         baseX: digit,
@@ -128,12 +142,13 @@ function SimpleVisualisationPage() {
 
     setAnimationStage(0)
 
-    if (routineStepRef.current == 0)
-    await sleep(1000)
+    if (routineStepRef.current == 0) {
+      await sleep(1000)
+      setAnimationStage(1)
+      await sleep(400)
+    }
 
-    // increase gap between numbers
-    setAnimationStage(1)
-    await sleep(500)
+    await sleep(s(100))
 
     await showInfo("1. Creating the biggest number by choosing the biggest digits first")
 
@@ -144,11 +159,11 @@ function SimpleVisualisationPage() {
     for (let i = 0; i < DIGITS; i++) {
       const id = decreasing[i][1]
       biggerNumber += decreasing[i][0] * 10 ** (DIGITS-i-1)
-      changeNumberProp("bigger", id, "number-blue", 800)
+      changeNumberProp("bigger", id, "number-blue", s(800))
       moveNumber("bigger", id, {x: i, y: 1})
       changeNumberProp("smaller", id, "number-blue")
       moveNumber("smaller", id, {x: i, y: 1})
-      await sleep(700)
+      await sleep(s(700))
     }
 
     console.log(biggerNumber)
@@ -163,9 +178,9 @@ function SimpleVisualisationPage() {
     for (let i = 0; i < DIGITS; i++) {
       const id = increasing[i][1]
       smallerNumber += increasing[i][0] * 10 ** (DIGITS-i-1)
-      changeNumberProp("smaller", id, "number-red", 800)
+      changeNumberProp("smaller", id, "number-red", s(800))
       moveNumber("smaller", id, {x: i, y: 2})
-      await sleep(700)
+      await sleep(s(700))
     }
 
     console.log(smallerNumber)
@@ -175,18 +190,20 @@ function SimpleVisualisationPage() {
     // subtraction
     await setAnimationStage(4)
 
-    const result = String(biggerNumber - smallerNumber)
-    setResultNumber(numStrToArray("0".repeat(DIGITS-result.length)+result))
+    const rawResult = String(biggerNumber - smallerNumber)
+    const result = "0".repeat(DIGITS-rawResult.length)+rawResult
+    setResultNumber(numStrToArray(result))
 
-    await sleep(800)
+    await sleep(s(800))
 
     for (let i = DIGITS-1; i > -1; i--) {
-      changeNumberProp("result", i, "text", 500, 1, 0)
-      await sleep(400)
+      changeNumberProp("result", i, "text", s(500), 1, 0)
+      await sleep(s(400))
     }
 
     if (numberChosenRef.current == result) {
       await showInfo("The result equals the input. The End", true)
+      speedUpRef.current = 1
       setRunning(false)
       setAnimationStage(-1)
       routineStepRef.current = 0
@@ -201,36 +218,38 @@ function SimpleVisualisationPage() {
 
     setAnimationStage(5)
 
-    await sleep(400)
+    await sleep(s(400))
 
     for (let i = 0; i < DIGITS; i++) {
-      changeNumberProp("smaller", increasing[i][1], "text", 800, 0, 10)
-      await sleep(100)
+      changeNumberProp("smaller", increasing[i][1], "text", s(800), 0, 10)
+      await sleep(s(100))
     }
 
     for (let i = 0; i < DIGITS; i++) {
-      changeNumberProp("bigger", decreasing[i][1], "text", 800, 0, 10)
-      await sleep(100)
+      changeNumberProp("bigger", decreasing[i][1], "text", s(800), 0, 10)
+      await sleep(s(100))
     }
 
     setAnimationStage(6)
 
-    await sleep(300)
+    await sleep(s(300))
 
     for (let i = 0; i < DIGITS; i++) {
       moveNumber("result", i, {y: -0.3})
     }
 
-    await sleep(800)
+    await sleep(s(800))
 
     routineStepRef.current += 1
-    setNumberChosen(String(result))
+    speedUpRef.current *= 0.9
+    setSpeedUp(speedUpRef.current)
+    setNumberChosen(result)
     animate()
   }
 
   return (
   <div className={`flex w-full min-h-screen max-h-screen flex-col p-5 items-center justify-center gap-40`}>
-    <h3 className="fades duration-700" hidden={running}>Enter any 4 digit number</h3>
+    <h3 className="fades duration-700" hidden={running}>Enter any {DIGITS} digit number with at least 2 different digits</h3>
     <div className="fixed inline-block font-mono text-[3rem] leading-none h-17 justify-center transition-all duration-700 z-10" style={{top: running ? "2rem" : "45%"}}>
       <input value={numberChosen} onChange={ e => {
           const value = e.target.value
@@ -238,14 +257,14 @@ function SimpleVisualisationPage() {
           if (Number.isNaN(numberValue) || numberValue < 0)
           {return}
           setNumberChosen(value)
-          }} inputMode="numeric" pattern="[0-9]*" className="fades tracking-[0.3rem] text-center text-transparent w-40 px-0 py-0 border-0 duration-700"
-        maxLength={DIGITS} hidden={running} />
+          }} inputMode="numeric" pattern="[0-9]*" className={`fades tracking-[0.3rem] text-center text-transparent px-0 py-0 border-0 duration-700 ${wrongInput ? "border-red-400" : "border-(--input)"}`}
+        maxLength={DIGITS} hidden={running} style={{width: `calc(10rem + (1ch + 0.3rem) * ${DIGITS-4})`}}/>
       
       <div aria-hidden 
       className="pointer-events-none inset-0 absolute flex items-center justify-center z-100 transition-all" 
       style={{
         gap: animationStage < 1 && routineStepRef.current == 0 ? "0.3rem" : "2rem",
-        transitionDuration: animationStage >= 5 || routineStepRef.current == 0 ? "800ms" : "0ms",
+        transitionDuration: animationStage >= 5 || routineStepRef.current == 0 ? `${sr(800)}ms` : "0ms",
         opacity: animationStage >= 6 ? "0" : "1",
         filter: `blur(${animationStage >= 6 ? "10" : "0"}px)`
       }}
@@ -262,7 +281,14 @@ function SimpleVisualisationPage() {
       </div>
     </div>
 
-    <PressButton className="fades duration-700" noRelease hidden={running} onClick={() => {
+    <PressButton className="fades duration-700" hidden={running} onClick={() => {
+      const formattedNumber = "0".repeat(DIGITS-numberChosen.length)+numberChosen
+      if ((new Set(formattedNumber)).size <= 1) {
+        setWrongInput(true)
+        return;
+      }
+      setWrongInput(false)
+
       setTimeout(() => {
         setRunning(true)
         routineStepRef.current = 0
@@ -271,7 +297,7 @@ function SimpleVisualisationPage() {
       document.querySelectorAll(".fades").forEach((e) => {
         e.classList.add("faded")
       })
-      setNumberChosen("0".repeat(DIGITS-numberChosen.length)+numberChosen)
+      setNumberChosen(formattedNumber)
       }}>Visualise</PressButton>
 
     {/* animation part */}
@@ -337,17 +363,19 @@ function SimpleVisualisationPage() {
       { animationStage >= 3 &&
         <div>
           <div 
-          className={`fixed flex bg-amber-100 transition-all duration-700 h-2 top-[calc(2.625rem+5rem*3)] rounded-xl`}
+          className={`fixed flex bg-amber-100 transition-all h-2 top-[calc(2.625rem+5rem*3)] rounded-xl`}
           style={{
             transform: `translateX(calc((-1ch - 2rem)*${DIGITS/2}))`,
-            width: animationStage == 4 ? `calc((1ch + 2rem)*${DIGITS})` : "0px"
+            width: animationStage == 4 ? `calc((1ch + 2rem)*${DIGITS})` : "0px",
+            transitionDuration: `${sr(700)}ms`
           }}
           ></div>
           <div 
-          className={`fixed flex bg-teal-500 transition-all duration-400 h-2 top-[calc(2.625rem+5rem*2)] rounded-xl`}
+          className={`fixed flex bg-teal-500 transition-all h-2 top-[calc(2.625rem+5rem*2)] rounded-xl`}
           style={{
             transform: `translateX(calc((-1ch - 2rem)*${DIGITS/2+0.5}))`,
-            width: animationStage == 4 ? `2rem` : "0px"
+            width: animationStage == 4 ? `2rem` : "0px",
+            transitionDuration: `${sr(400)}ms`
           }}
           ></div>
         </div>
