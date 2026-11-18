@@ -324,7 +324,9 @@ function SimpleVisualisationPage() {
     </div>
     }
 
-    <PressButton className="fades duration-700 fixed top-[70%]" hidden={running} onClick={() => {
+    <PressButton className="fades duration-700 fixed" hidden={running} 
+      style={{top: `${hasRanOnce ? 65 : 60}%`}}
+      onClick={() => {
       const formattedNumber = "0".repeat(DIGITS-numberChosen.length)+numberChosen
       if ((new Set(formattedNumber)).size <= 1) {
         setWrongInput(true)

@@ -5,6 +5,7 @@ export default function PressButton({
   className = '',
   onClick,
   noRelease = false,
+  style,
   ...props
 }: React.ComponentProps<"button"> & {noRelease?: boolean}) {
   const [pressed, setPressed] = useState(false)
@@ -34,7 +35,7 @@ export default function PressButton({
     clearTimeout(clickTimer.current)
   }, [])
 
-  return (<div className={`press-button-wrap ${className}`} ref={buttonRef}>
+  return (<div className={`press-button-wrap ${className}`} ref={buttonRef} style={style}>
     <button
       className={`press-button ${pressed ? " pressed" : ""}`}
       onPointerDown={press}
